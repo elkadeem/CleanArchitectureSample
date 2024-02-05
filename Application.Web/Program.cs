@@ -1,5 +1,8 @@
 using Application.Core;
 using Application.Infrastructure;
+using Application.Web.Authentication;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
@@ -34,6 +37,16 @@ namespace Application.Web
                     options.UseInMemoryDatabase("fortestingdb");
                 });
 
+                builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+                        .AddNegotiate();
+
+                builder.Services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
+
+                builder.Services.AddAuthorization(options =>
+                {
+                    options.FallbackPolicy = options.DefaultPolicy;
+                });
+
                 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
                 builder.Services.AddTransient<UsersService>();
 
@@ -56,6 +69,7 @@ namespace Application.Web
 
                 app.UseRouting();
 
+                app.UseAuthentication();
                 app.UseAuthorization();
 
                 app.MapRazorPages();

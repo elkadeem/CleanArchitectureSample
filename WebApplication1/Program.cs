@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Negotiate;
 
 namespace WebApplication1
@@ -12,6 +13,8 @@ namespace WebApplication1
 
             builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
             .AddNegotiate();
+
+            
 
             builder.Services.AddAuthorization(options =>
             {
