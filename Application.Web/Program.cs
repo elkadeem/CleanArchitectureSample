@@ -42,6 +42,8 @@ namespace Application.Web
 
                 builder.Services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
 
+                builder.Services.Configure<AllowedRolesOptions>(builder.Configuration.GetSection("Authentication"));
+
                 builder.Services.AddAuthorization(options =>
                 {
                     options.FallbackPolicy = options.DefaultPolicy;
