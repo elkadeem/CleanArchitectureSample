@@ -1,0 +1,23 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<AuthorizeView>
+            <Authorized>
+                <div>
+            @context.User.Identity?.Name
+
+                </div>
+        @foreach (var claim in context.User.Claims)
+        {
+            <div>@claim.Type: @claim.Value</div>
+        }
+            </Authorized>
+            <NotAuthorized>
+                <div>Not authenticated</div>
+            </NotAuthorized>
+        </AuthorizeView>
