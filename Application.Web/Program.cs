@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using System.Security.Claims;
 
 namespace Application.Web
 {
@@ -46,6 +47,8 @@ namespace Application.Web
 
                 builder.Services.AddAuthorization(options =>
                 {
+                    options.AddPolicy("WaelPolicy", policy => policy.RequireUserName("MIDDLEEAST\\welkadim"));
+                    options.AddPolicy("AdminPolicy", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
                     options.FallbackPolicy = options.DefaultPolicy;
                 });
 
@@ -80,7 +83,7 @@ namespace Application.Web
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Application terminated unexpectedly");              
+                Log.Fatal(ex, "Application terminated unexpectedly");
             }
             finally
             {
