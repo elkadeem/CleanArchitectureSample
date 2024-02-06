@@ -53,6 +53,7 @@ namespace Application.Web
                 builder.Services.AddTransient<UsersService>();
 
                 // Add services to the container.
+                builder.Services.AddControllersWithViews();
                 builder.Services.AddRazorPages();
 
                 var app = builder.Build();
@@ -74,6 +75,7 @@ namespace Application.Web
                 app.UseAuthentication();
                 app.UseAuthorization();
 
+                app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
                 app.MapRazorPages();
 
                 app.Run();
