@@ -16,6 +16,7 @@ namespace Application.Web.Pages
 
         public void OnGet()
         {
+            _logger.LogWarning($"User '{User.Identity.Name}' is trying to access the application.");
             ViewData["ConnectionString"] = _configuration.GetConnectionString("DefaultConnection");
 
             ViewData["adminRole"] = _configuration["Roles:AdminRole"];

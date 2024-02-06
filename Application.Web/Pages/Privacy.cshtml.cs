@@ -14,6 +14,7 @@ namespace Application.Web.Pages
 
         public void OnGet()
         {
+            _logger.LogWarning($"User '{User.Identity.Name}' is trying to access the application.");
         }
     }
 
