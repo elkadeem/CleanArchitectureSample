@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Application.Core
 {
@@ -17,87 +18,81 @@ namespace Application.Core
             _logger = logger;
         }
 
-        public List<User> GetUsers()
+        public Task<(List<User> Items, int TotalItemsCount)> GetAsync(string userName
+            , string name
+            , string email
+            , bool? isActive
+            , int page = 1
+            , int pageSize = 10)
         {            
-            _logger.LogDebug("Calling method {methodname}", nameof(GetUsers));
-            return _usersRepository.GetAll();
+            int pageIndex = page<= 0? 0 : page - 1;
+            return _usersRepository.GetAsync(userName, name, email, isActive, pageIndex, pageSize);
         }
 
-        public User GetUser(int id)
+        public Task<User> GetAsync(int id)
         {
-            _logger.LogDebug("Calling method {methodname} with {id}", nameof(GetUser), id);
-            return _usersRepository.GetUser(id);
+            _logger.LogDebug("Calling method {methodname} with {id}", nameof(GetAsync), id);
+            return _usersRepository.GetAsync(id);
         }
 
-        public void AddUser(User user)
+        public async Task AddAsync(User user)
         {
             if (user is null)
-            {
-                _logger.LogDebug($"{nameof(AddUser)} is null");
+            {               
                 throw new ArgumentNullException(nameof(user));
             }
-
-            if (string.IsNullOrWhiteSpace(user.Name))
-            {
-                _logger.LogError("name is empty");
-                throw new ArgumentOutOfRangeException(nameof(user.Name)
-                    , "User name can't be null or empty."); 
-            }
-
-            if (string.IsNullOrWhiteSpace(user.Email))
-            {
-                _logger.LogError("Email is empty");
-                throw new ArgumentOutOfRangeException(nameof(user.Email)
-                    , "Email can't be null or empty.");
-            }
-
-            if(_usersRepository.IsUserExist(0, user.Email))
+            
+            if(await _usersRepository.IsUserEmailExistAsync(0, user.Email))
             {
                 _logger.LogError("Email exists for another user.");
                 throw new ArgumentOutOfRangeException(nameof(user.Email)
                     , "Email is exist for another user.");
             }
 
-            _usersRepository.AddUser(user);
+            if (await _usersRepository.IsUserNameExistAsync(0, user.UserName))
+            {
+                _logger.LogError("Email exists for another user.");
+                throw new ArgumentOutOfRangeException(nameof(user.Email)
+                    , "Email is exist for another user.");
+            }
+
+            await _usersRepository.AddAsync(user);
         }
 
-        public void UpdateUser(User user)
+        public async Task UpdateAsync(User user)
         {
             if (user is null)
             {
                 throw new ArgumentNullException(nameof(user));
             }
 
-            var currentUser = _usersRepository.GetUser(user.Id);
-            if (user == null)
+            var currentUser = await _usersRepository.GetAsync(user.Id);
+            if (currentUser == null)
+            {
                 throw new ArgumentException($"There is no user with id {user.Id}"
                     , nameof(user));
-
-            if (string.IsNullOrWhiteSpace(user.Name))
-            {
-                throw new ArgumentOutOfRangeException(nameof(user.Name)
-                    , "User name can't be null or empty.");
             }
 
-            if (string.IsNullOrWhiteSpace(user.Email))
+            if (await _usersRepository.IsUserEmailExistAsync(user.Id, user.Email))
             {
-                throw new ArgumentOutOfRangeException(nameof(user.Email)
-                    , "Email can't be null or empty.");
-            }
-
-            if(user.Email.EndsWith("@cbo.om"))
-            {
-
-            }
-
-            if (_usersRepository.IsUserExist(user.Id, user.Email))
-            {
+                _logger.LogError("Email exists for another user.");
                 throw new ArgumentOutOfRangeException(nameof(user.Email)
                     , "Email is exist for another user.");
             }
 
-            currentUser.Email = user.Email;
-            _usersRepository.UpdateUser(currentUser);
+            if (await _usersRepository.IsUserNameExistAsync(user.Id, user.UserName))
+            {
+                _logger.LogError("Email exists for another user.");
+                throw new ArgumentOutOfRangeException(nameof(user.Email)
+                    , "Email is exist for another user.");
+            }
+
+            currentUser.UpdateUser(user.UserName, user.Name, user.Email);
+            currentUser.Country = user.Country;
+            currentUser.Active = user.Active;
+            await _usersRepository.UpdateAsync(currentUser);
         }
+
+        
     }
 }

@@ -1,8 +1,12 @@
 using Application.Core;
 using Application.Infrastructure;
+using Application.Web.Authentication;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using System.Security.Claims;
 
 namespace Application.Web
 {
@@ -30,14 +34,29 @@ namespace Application.Web
 
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 {
-                    //options.UseSqlServer("");
-                    options.UseInMemoryDatabase("fortestingdb");
+                    options.UseSqlServer("name=ConnectionStrings:DefaultConnection");
+                    //options.UseInMemoryDatabase("fortestingdb");
+                });
+
+                builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+                        .AddNegotiate();
+
+                builder.Services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
+
+                builder.Services.Configure<AllowedRolesOptions>(builder.Configuration.GetSection("Authentication"));
+
+                builder.Services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("WaelPolicy", policy => policy.RequireUserName("MIDDLEEAST\\welkadim"));
+                    options.AddPolicy("AdminPolicy", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
+                    options.FallbackPolicy = options.DefaultPolicy;
                 });
 
                 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
                 builder.Services.AddTransient<UsersService>();
 
                 // Add services to the container.
+                builder.Services.AddControllersWithViews();
                 builder.Services.AddRazorPages();
 
                 var app = builder.Build();
@@ -56,15 +75,17 @@ namespace Application.Web
 
                 app.UseRouting();
 
+                app.UseAuthentication();
                 app.UseAuthorization();
 
+                app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
                 app.MapRazorPages();
 
                 app.Run();
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Application terminated unexpectedly");              
+                Log.Fatal(ex, "Application terminated unexpectedly");
             }
             finally
             {

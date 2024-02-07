@@ -11,41 +11,82 @@ namespace Application.Infrastructure
         {
             _applicationDbContext = applicationDbContext;
         }
-        public bool AddUser(User user)
+
+        public async Task<bool> AddAsync(User user)
         {
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
             _applicationDbContext.Users.Add(user);
-             int affectRows = _applicationDbContext.SaveChanges();
-            return affectRows > 0;
+            int affectedRows = await _applicationDbContext.SaveChangesAsync();
+            return affectedRows > 0;
         }
 
-        public List<User> GetAll()
+        public async Task<(List<User> Items, int TotalItemsCount)> GetAsync(string userName, string name, string email, bool? isActive, int pageIndex = 0, int pageSize = 10)
         {
-            return _applicationDbContext.Users.ToList();
+            var query = _applicationDbContext.Users.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(userName))
+            {
+                query = query.Where(u => u.UserName.Contains(userName));
+            }
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                query = query.Where(u => u.Name.Contains(name));
+            }
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                query = query.Where(u => u.Email.Contains(email));
+            }
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(u => u.Active == isActive.Value);
+            }
+
+            int totalItemsCount = await query.CountAsync();
+            List<User> items = await query
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (items, totalItemsCount);
         }
 
-        public User GetUser(int id)
+        public Task<User> GetAsync(int id)
+        {
+            return _applicationDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public Task<bool> IsUserEmailExistAsync(int userId, string email)
         {
             return _applicationDbContext
                 .Users
-                .FirstOrDefault(c => c.Id == id);
+                .AnyAsync(u => u.Id != userId && u.Email == email);
         }
 
-        public bool IsUserExist(int id, string email)
+        public Task<bool> IsUserNameExistAsync(int userId, string userName)
         {
-            return _applicationDbContext.Users
-                .Any(c => c.Id != id && c.Email.Equals(email));  
+            return _applicationDbContext.Users.AnyAsync(u => u.Id != userId
+            && u.UserName == userName);
         }
 
-        public bool UpdateUser(User user)
+        public async Task<bool> UpdateAsync(User user)
         {
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
             var entry = _applicationDbContext.Users.Entry(user);
-            if (entry.State == EntityState.Detached)
+            if(entry.State == EntityState.Detached)
             {
                 _applicationDbContext.Users.Attach(user);
             }
 
             entry.State = EntityState.Modified;
-            int affectedRows = _applicationDbContext.SaveChanges();
+            int affectedRows = await _applicationDbContext.SaveChangesAsync();
             return affectedRows > 0;
         }
     }

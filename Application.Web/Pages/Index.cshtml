@@ -9,4 +9,14 @@
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
-<div style="color:aquamarine">@ViewData["ConnectionString"]</div>
+<div>@ViewData["ConnectionString"]</div>
+
+<div>
+    User Claims
+    <ul>
+        @foreach (var claim in User.Claims)
+        {
+            <li>@claim.Type: @claim.Value</li>
+        }
+    </ul>
+</div>
