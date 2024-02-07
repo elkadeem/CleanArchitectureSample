@@ -34,8 +34,8 @@ namespace Application.Web
 
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 {
-                    //options.UseSqlServer("");
-                    options.UseInMemoryDatabase("fortestingdb");
+                    options.UseSqlServer("name=ConnectionStrings:DefaultConnection");
+                    //options.UseInMemoryDatabase("fortestingdb");
                 });
 
                 builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
@@ -56,6 +56,7 @@ namespace Application.Web
                 builder.Services.AddTransient<UsersService>();
 
                 // Add services to the container.
+                builder.Services.AddControllersWithViews();
                 builder.Services.AddRazorPages();
 
                 var app = builder.Build();
@@ -77,6 +78,7 @@ namespace Application.Web
                 app.UseAuthentication();
                 app.UseAuthorization();
 
+                app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
                 app.MapRazorPages();
 
                 app.Run();
