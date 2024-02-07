@@ -73,14 +73,14 @@ namespace Application.Core
                     , nameof(user));
             }
 
-            if (await _usersRepository.IsUserEmailExistAsync(0, user.Email))
+            if (await _usersRepository.IsUserEmailExistAsync(user.Id, user.Email))
             {
                 _logger.LogError("Email exists for another user.");
                 throw new ArgumentOutOfRangeException(nameof(user.Email)
                     , "Email is exist for another user.");
             }
 
-            if (await _usersRepository.IsUserNameExistAsync(0, user.UserName))
+            if (await _usersRepository.IsUserNameExistAsync(user.Id, user.UserName))
             {
                 _logger.LogError("Email exists for another user.");
                 throw new ArgumentOutOfRangeException(nameof(user.Email)
