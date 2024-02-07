@@ -73,7 +73,7 @@ namespace Application.Web.Controllers
                 new SelectListItem { Text = "Admin", Value = "Admin" },
                 new SelectListItem { Text = "User", Value = "User" },
                 new SelectListItem { Text = "Guest", Value = "Guest" }
-            }; ;
+            };
         }
 
         // POST: UsersController/Create
