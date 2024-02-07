@@ -1,15 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Application.Core
 {
     public interface IUsersRepository
-    {
-        List<User> GetAll();
-        User GetUser(int id);
-        bool AddUser(User user);
-        bool UpdateUser(User user);
-        bool IsUserExist(int userId, string email);
+    {        
+        Task<(List<User> Items, int TotalItemsCount)> GetAsync(string userName
+            , string name
+            , string email
+            , bool? isActive
+            , int pageIndex = 0
+            , int pageSize = 10);
+        
+        Task<User> GetAsync(int id);
+        Task<bool> AddAsync(User user);
+        Task<bool> UpdateAsync(User user);
+        Task<bool> IsUserEmailExistAsync(int userId, string email);
+        Task<bool> IsUserNameExistAsync(int userId, string userName);
     }
 }

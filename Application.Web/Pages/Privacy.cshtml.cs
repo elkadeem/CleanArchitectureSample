@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Application.Web.Pages
 {
+    [Authorize(Policy = "WaelPolicy")]
+    [Authorize(Policy = "AdminPolicy")]
     public class PrivacyModel : PageModel
     {
         private readonly ILogger<PrivacyModel> _logger;
@@ -14,6 +17,7 @@ namespace Application.Web.Pages
 
         public void OnGet()
         {
+            _logger.LogWarning($"User '{User.Identity.Name}' is trying to access the application.");
         }
     }
 
