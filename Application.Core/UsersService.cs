@@ -31,7 +31,7 @@ namespace Application.Core
 
         public Task<User> GetAsync(int id)
         {
-            _logger.LogDebug("Calling method {methodname} with {id}", nameof(GetUser), id);
+            _logger.LogDebug("Calling method {methodname} with {id}", nameof(GetAsync), id);
             return _usersRepository.GetAsync(id);
         }
 
